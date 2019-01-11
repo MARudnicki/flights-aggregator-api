@@ -1,12 +1,12 @@
 package toki.flights.service;
 
-import toki.flights.dto.CheapFlightsDTO;
+import toki.flights.dto.FlightsDTO;
 
 import java.util.List;
 
 public interface GetFlightsData {
 
-    public List<CheapFlightsDTO> getCheapFlights();
+    public List<FlightsDTO> getCheapFlights();
 
 }
 

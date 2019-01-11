@@ -2,7 +2,7 @@ package toki.flights.service.impl;
 
 import org.junit.Assert;
 import org.junit.Test;
-import toki.flights.dto.CheapFlightsDTO;
+import toki.flights.dto.FlightsDTO;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -15,11 +15,11 @@ public class GetFlightsDataImplTest {
     @Test
     public void getCheapFlights() {
 
-        List<CheapFlightsDTO> cheapFlightsDTOS = getFlightsData.getCheapFlights();
-        Assert.assertNotNull(cheapFlightsDTOS);
-        Assert.assertTrue(cheapFlightsDTOS.size() > 0);
+        List<FlightsDTO> flights = getFlightsData.getCheapFlights();
+        Assert.assertNotNull(flights);
+        Assert.assertTrue(flights.size() > 0);
 
-        LOG.info("Number of Entries retrieved: " + cheapFlightsDTOS.size());
-        LOG.info("Response Entries: " + cheapFlightsDTOS.toString());
+        LOG.info("Number of Entries retrieved: " + flights.size());
+        LOG.info("Response Entries: " + flights.toString());
     }
 }
