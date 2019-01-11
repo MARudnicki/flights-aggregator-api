@@ -8,5 +8,7 @@ public interface GetFlightsData {
 
     public List<FlightsDTO> getCheapFlights();
 
+    public List<FlightsDTO> getBusinessFlights();
+
 }
 

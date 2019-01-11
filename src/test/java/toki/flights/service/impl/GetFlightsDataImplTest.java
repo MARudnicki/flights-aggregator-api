@@ -12,14 +12,24 @@ public class GetFlightsDataImplTest {
     private static final Logger LOG = Logger.getLogger(GetFlightsDataImplTest.class.getName());
 
     GetFlightsDataImpl getFlightsData = new GetFlightsDataImpl();
+
     @Test
     public void getCheapFlights() {
 
         List<FlightsDTO> flights = getFlightsData.getCheapFlights();
         Assert.assertNotNull(flights);
-        Assert.assertTrue(flights.size() > 0);
 
-        LOG.info("Number of Entries retrieved: " + flights.size());
-        LOG.info("Response Entries: " + flights.toString());
+        LOG.info("Number of Cheap Flights retrieved: " + flights.size());
+        LOG.info("Cheap Flights Entries: " + flights.toString());
+    }
+
+    @Test
+    public void getBusinessFlights() {
+
+        List<FlightsDTO> flights = getFlightsData.getBusinessFlights();
+        Assert.assertNotNull(flights);
+
+        LOG.info("Number of Business Flights retrieved: " + flights.size());
+        LOG.info("Business Flights Entries: " + flights.toString());
     }
 }

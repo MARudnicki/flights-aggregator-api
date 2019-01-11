@@ -1,11 +1,7 @@
 package toki.flights.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import toki.flights.util.CheapFlightsDeserializer;
-
 import java.util.Date;
 
-@JsonDeserialize(using = CheapFlightsDeserializer.class)
 public class FlightsDTO {
 
     private String source;
