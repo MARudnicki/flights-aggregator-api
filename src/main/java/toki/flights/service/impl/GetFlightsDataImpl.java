@@ -4,21 +4,22 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import org.springframework.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.web.client.RestTemplate;
 import toki.flights.dto.FlightsDTO;
 import toki.flights.service.GetFlightsData;
 import toki.flights.util.BusinessFlightsDeserializer;
 import toki.flights.util.CheapFlightsDeserializer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class GetFlightsDataImpl implements GetFlightsData {
 
-    private static final Logger LOG = Logger.getLogger(GetFlightsDataImpl.class.getName());
+    private static final Logger LOG = Logger.getLogger(GetFlightsDataImpl.class);
 
     @Override
     public List<FlightsDTO> getCheapFlights() {
@@ -27,7 +28,7 @@ public class GetFlightsDataImpl implements GetFlightsData {
         String response = restTemplate.getForObject("https://obscure-caverns-79008.herokuapp.com/cheap", String.class);
 
         if(StringUtils.isEmpty(response)) {
-            LOG.warning("NO Response received for Cheap flights");
+            LOG.error("NO Response received for Cheap flights");
             return Collections.emptyList();
         }
 
@@ -42,7 +43,7 @@ public class GetFlightsDataImpl implements GetFlightsData {
         String response = restTemplate.getForObject("https://obscure-caverns-79008.herokuapp.com/business", String.class);
 
         if(StringUtils.isEmpty(response)) {
-            LOG.warning("NO Response received for Business flights");
+            LOG.error("NO Response received for Business flights");
             return Collections.emptyList();
         }
 
@@ -50,19 +51,23 @@ public class GetFlightsDataImpl implements GetFlightsData {
         return getFlightsDTOsFromJSONResponse(response, new BusinessFlightsDeserializer());
     }
 
-    private List<FlightsDTO> getFlightsDTOsFromJSONResponse(String JSONResponse, StdDeserializer<FlightsDTO> deserializer) {
+    protected List<FlightsDTO> getFlightsDTOsFromJSONResponse(String JSONResponse, StdDeserializer<FlightsDTO> deserializer) {
         List<FlightsDTO> flightsDTOS = new ArrayList<>();
 
-        ObjectMapper mapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addDeserializer(FlightsDTO.class, deserializer);
-        mapper.registerModule(module);
+        if(StringUtils.isNotBlank(JSONResponse) && null != deserializer) {
+            ObjectMapper mapper = new ObjectMapper();
+            SimpleModule module = new SimpleModule();
+            module.addDeserializer(FlightsDTO.class, deserializer);
+            mapper.registerModule(module);
 
-        try {
-            flightsDTOS = mapper.readValue(JSONResponse, new TypeReference<List<FlightsDTO>>() {
-            });
-        }catch (Exception e){
-            e.printStackTrace();
+            try {
+                flightsDTOS = mapper.readValue(JSONResponse, new TypeReference<List<FlightsDTO>>() {
+                });
+            } catch (IOException e) {
+                LOG.error("Could not map the Response to: " + FlightsDTO.class.getName()
+                        + " using Deserializer: " + deserializer.getClass().getName()
+                        + " for Response String: " + JSONResponse);
+            }
         }
 
         return flightsDTOS;
