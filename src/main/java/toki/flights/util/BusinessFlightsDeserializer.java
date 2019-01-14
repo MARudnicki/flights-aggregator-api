@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import toki.flights.constants.FlightsConstants;
 import toki.flights.dto.FlightsDTO;
 import toki.flights.exception.FlightsJsonResponseProcessingException;
 
@@ -28,15 +29,15 @@ public class BusinessFlightsDeserializer extends StdDeserializer<FlightsDTO> {
 
         JsonNode node = jsonParser.getCodec().readTree(jsonParser);
 
-        JsonNode flightNode = node.get("flight");
-        JsonNode departureTimeNode = node.get("departure");
-        JsonNode arrivalTimeNode = node.get("arrival");
+        JsonNode sourceDestinationNode = node.get(FlightsConstants.BusinessFlightsApiAttributes.SOURCE_DESTINATION);
+        JsonNode departureTimeNode = node.get(FlightsConstants.BusinessFlightsApiAttributes.DEPARTURE_TIME);
+        JsonNode arrivalTimeNode = node.get(FlightsConstants.BusinessFlightsApiAttributes.ARRIVAL_TIME);
 
-        if(null == flightNode || null == departureTimeNode || null == arrivalTimeNode){
+        if(null == sourceDestinationNode || null == departureTimeNode || null == arrivalTimeNode){
             throw new FlightsJsonResponseProcessingException("JSON Node content mismatch");
         }
 
-        String[] flight = flightNode.asText().split("->");
+        String[] flight = sourceDestinationNode.asText().split("->");
 
         String source = "";
         String destination = "";
