@@ -39,10 +39,10 @@ public class BusinessFlightsDeserializer extends StdDeserializer<FlightsDTO> {
 
         String[] flight = sourceDestinationNode.asText().split("->");
 
-        String source = "";
-        String destination = "";
-        Date departureTime = new Date();
-        Date arrivalTime = new Date();
+        String source;
+        String destination;
+        Date departureTime;
+        Date arrivalTime;
 
         if(flight.length > 0) {
             source = flight[0].trim();
@@ -51,13 +51,14 @@ public class BusinessFlightsDeserializer extends StdDeserializer<FlightsDTO> {
             throw new FlightsJsonResponseProcessingException("ERROR occurred while deserializing flights' Source and Destination");
         }
 
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
         try {
             departureTime = dateFormat.parse(departureTimeNode.asText());
             arrivalTime = dateFormat.parse(arrivalTimeNode.asText());
         } catch (ParseException pe) {
-            //TODO throw new FlightsJsonResponseProcessingException("");
+            throw new FlightsJsonResponseProcessingException("ERROR occurred while parsing flights' Departure time: "
+                    + departureTimeNode.asText() + " OR Arrival time: " + arrivalTimeNode.asText());
         }
 
         return new FlightsDTO(source, destination, departureTime, arrivalTime);
