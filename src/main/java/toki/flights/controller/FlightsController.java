@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import toki.flights.constants.FlightsConstants;
 import toki.flights.dto.FlightsDTO;
 import toki.flights.service.GetFlightsData;
 
@@ -21,60 +20,28 @@ public class FlightsController {
     private GetFlightsData getFlightsData = (GetFlightsData) context.getBean("getFlightsData");
 
     @RequestMapping(value = "/flights", method = RequestMethod.GET)
-    public List<FlightsDTO> getAllFlights(@RequestParam(value = "sort", required = false) String sortBy) throws MalformedURLException{
+    public List<FlightsDTO> getFlights(@RequestParam(value = "sort", required = false) String sortBy,
+                                       @RequestParam(value = "page", required = false) Integer page,
+                                       @RequestParam(value = "size", required = false) Integer size,
+                                       @RequestParam(value = "flt", required = false) String conditions) throws MalformedURLException {
 
-        List<FlightsDTO> flights = new ArrayList<>();
-        flights.addAll(getFlightsData.getCheapFlights());
-        flights.addAll(getFlightsData.getBusinessFlights());
+        List<FlightsDTO> flights = getFlightsData.getFlights();
 
-        if(StringUtils.isNotBlank(sortBy)) {
+        // Filtering
+        if (StringUtils.isNotBlank(conditions)) {
+            flights = getFlightsData.getFlightsFiltered(flights, conditions);
+        }
 
-            switch (sortBy) {
-                case FlightsConstants.ApiAttributes.SOURCE:
-                    Collections.sort(flights, new SortBySource());
-                    break;
-                case FlightsConstants.ApiAttributes.DESTINATION:
-                    Collections.sort(flights, new SortByDestination());
-                    break;
-                case FlightsConstants.ApiAttributes.DEPARTURE_TIME:
-                    Collections.sort(flights, new SortByDepartureTime());
-                    break;
-                case FlightsConstants.ApiAttributes.ARRIVAL_TIME:
-                    Collections.sort(flights, new SortByArrivalTime());
-                    break;
-                default:
-                    throw new MalformedURLException("Can't process request because of invalid Sorting parameter. ");
-            }
+        // Sorting
+        if (StringUtils.isNotBlank(sortBy)) {
+            flights = getFlightsData.getFlightsSorted(flights, sortBy);
+        }
+
+        // Pagination
+        if (null != page && null != size && page > 0 && size >= 0) {
+            flights = getFlightsData.getFlightsPaginated(flights, page, size);
         }
 
         return flights;
-    }
-
-    public class SortBySource implements Comparator<FlightsDTO> {
-        public int compare(FlightsDTO a, FlightsDTO b)
-        {
-            return a.getSource().compareToIgnoreCase(b.getSource());
-        }
-    }
-
-    public class SortByDestination implements Comparator<FlightsDTO> {
-        public int compare(FlightsDTO a, FlightsDTO b)
-        {
-            return a.getDestination().compareToIgnoreCase(b.getDestination());
-        }
-    }
-
-    public class SortByDepartureTime implements Comparator<FlightsDTO> {
-        public int compare(FlightsDTO a, FlightsDTO b)
-        {
-            return a.getDepartureTime().compareTo(b.getDepartureTime());
-        }
-    }
-
-    public class SortByArrivalTime implements Comparator<FlightsDTO> {
-        public int compare(FlightsDTO a, FlightsDTO b)
-        {
-            return a.getArrivalTime().compareTo(b.getArrivalTime());
-        }
     }
 }

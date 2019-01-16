@@ -21,4 +21,16 @@ public class FlightsConstants {
         public static final String DEPARTURE_TIME = "departure";
         public static final String ARRIVAL_TIME = "arrival";
     }
+
+    public class Resources {
+        public static final String CHEAP_FLIGHT_URL = "https://obscure-caverns-79008.herokuapp.com/cheap";
+        public static final String BUSINESS_FLIGHT_URL = "https://obscure-caverns-79008.herokuapp.com/business";
+    }
+
+    public class Filters {
+        public static final String FILTERS_DELIMITER = ";";
+        public static final String KEY_VALUE_DELIMITER = ":";
+        public static final String BY_SOURCE = "src";
+        public static final String BY_DESTINATION = "dest";
+    }
 }
