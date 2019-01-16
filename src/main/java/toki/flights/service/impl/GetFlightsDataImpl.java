@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 import toki.flights.constants.FlightsConstants;
 import toki.flights.dto.FlightsDTO;
@@ -15,20 +16,38 @@ import toki.flights.util.CheapFlightsDeserializer;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class GetFlightsDataImpl implements GetFlightsData {
 
     private static final Logger LOG = Logger.getLogger(GetFlightsDataImpl.class);
+    public static final int CONNECTION_TIMEOUT_SECONDS = 10;
 
     private RestTemplate restTemplate = new RestTemplate();
 
     @Override
     public List<FlightsDTO> getFlights() {
+
         List<FlightsDTO> flights = new ArrayList<>();
-        flights.addAll(this.getCheapFlights());
-        flights.addAll(this.getBusinessFlights());
+
+        ExecutorService es = Executors.newCachedThreadPool();
+        es.execute(new Thread (() -> flights.addAll(getCheapFlights())));
+        es.execute(new Thread (() -> flights.addAll(getBusinessFlights())));
+        es.shutdown();
+
+        try {
+            es.awaitTermination(CONNECTION_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            LOG.error("TIMEOUT ERROR: Could not retrieve flights details");
+        }
+
         return flights;
     }
 
@@ -138,7 +157,12 @@ public class GetFlightsDataImpl implements GetFlightsData {
 
     protected List<FlightsDTO> getBusinessFlights() {
 
-        String response = restTemplate.getForObject(FlightsConstants.Resources.BUSINESS_FLIGHT_URL, String.class);
+        String response = StringUtils.EMPTY;
+        try {
+            response = restTemplate.getForObject(FlightsConstants.Resources.BUSINESS_FLIGHT_URL, String.class);
+        } catch (ResourceAccessException res) {
+
+        }
 
         if (StringUtils.isEmpty(response)) {
             LOG.error("NO Response received for Business flights");
