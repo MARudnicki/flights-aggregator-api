@@ -1,7 +1,8 @@
-package hello;
+package toki.flights.controller;
 
 import java.util.Arrays;
 
+import org.apache.log4j.BasicConfigurator;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -12,6 +13,7 @@ import org.springframework.context.annotation.Bean;
 public class Application {
 
     public static void main(String[] args) {
+        BasicConfigurator.configure();
         SpringApplication.run(Application.class, args);
     }
 
@@ -26,8 +28,6 @@ public class Application {
             for (String beanName : beanNames) {
                 System.out.println(beanName);
             }
-
         };
     }
-
 }
